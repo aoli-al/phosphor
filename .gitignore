@@ -27,6 +27,8 @@ dependency-reduced-pom.xml
 *.war
 *.ear
 
+hs_err*.log
+
 
 
 
