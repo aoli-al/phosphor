@@ -299,6 +299,17 @@ public enum PhosphorOption {
             Only used by instrumenter, which reads properties map
              */
         }
+    },
+    ADD_EXPORTS(new PhosphorOptionBuilder("Add additional exports to java.base module-info.",
+            true, false).argType(String.class).alternativeName("addExports")) {
+        @Override
+        public void configure(boolean forRuntimeInst, boolean isPresent, CommandLine commandLine) {
+            if (isPresent) {
+                for (String s : commandLine.getOptionValue(optionName).split(",")) {
+                    Configuration.addExports.add(s);
+                }
+            }
+        }
     };
 
     final String optionName;

@@ -727,6 +727,11 @@ public class Instrumenter {
         classNode.module.exports.add(new ModuleExportNode("edu/columbia/cs/psl/phosphor/runtime", 0, null));
         classNode.module.exports.add(new ModuleExportNode("edu/columbia/cs/psl/phosphor/struct", 0, null));
 
+        for (String export: Configuration.addExports) {
+            classNode.module.exports.add(new ModuleExportNode(export, 0, null));
+        }
+
+
         //Add pac
         classNode.module.packages.addAll(packages);
         ClassWriter cw = new ClassWriter(0);

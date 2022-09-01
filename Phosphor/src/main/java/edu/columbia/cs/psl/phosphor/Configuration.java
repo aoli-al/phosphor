@@ -68,6 +68,8 @@ public class Configuration {
     public static TransformationCache CACHE = null;
     public static boolean TAINT_THROUGH_SERIALIZATION = true;
 
+    public static Set<String> addExports = new HashSet<>();
+
     private Configuration() {
         // Prevents this class from being instantiated
     }
