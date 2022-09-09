@@ -24,7 +24,7 @@ import java.security.ProtectionDomain;
 
 public class PreMain {
 
-    public static boolean DEBUG = System.getProperty("phosphor.debug") != null;
+    public static boolean DEBUG = false;
     public static boolean RUNTIME_INST = false;
     public static boolean INSTRUMENTATION_EXCEPTION_OCCURRED = false;
     public static ClassLoader bigLoader = PreMain.class.getClassLoader();
@@ -148,7 +148,9 @@ public class PreMain {
                         if (!debugDir.exists()) {
                             debugDir.mkdir();
                         }
-                        File f = new File("debug-preinst/" + className.replace("/", ".") + ".class");
+                        String fileName = className.replace("/", ".") + ".class";
+                        fileName = fileName.substring(0, Integer.min(fileName.length(), 254));
+                        File f = new File("debug-preinst/" + fileName);
                         FileOutputStream fos = new FileOutputStream(f);
                         fos.write(classfileBuffer);
                         fos.close();
