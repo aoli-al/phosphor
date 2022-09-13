@@ -139,7 +139,7 @@ public class LocalVariableAdder extends MethodVisitor {
                 this.indexOfPhosphorStackData);
         super.visitLocalVariable("phosphorStackFrameShouldBeClearedAtEnd",
                 "Z", null, firstLabel, endLabel,
-                this.indexOfPhosphorStackDataNeedsPoppingForStackFrame);
+                this.indexOfStackDataNeedsPoppingLV);
         for (int i = this.indexOfFirstStackTaintTag; i < this.indexOfLastStackTaintTag; i++) {
             super.visitLocalVariable("phosphorStackTaint" + (i - this.indexOfFirstStackTaintTag),
                     Configuration.TAINT_TAG_DESC, null, firstLabel, endLabel, i);
