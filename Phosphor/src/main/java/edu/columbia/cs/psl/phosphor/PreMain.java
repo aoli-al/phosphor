@@ -3,7 +3,6 @@ package edu.columbia.cs.psl.phosphor;
 import edu.columbia.cs.psl.phosphor.instrumenter.*;
 import edu.columbia.cs.psl.phosphor.instrumenter.asm.OffsetPreservingClassReader;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.commons.OurSerialVersionUIDAdder;
-import edu.columbia.cs.psl.phosphor.runtime.StringUtils;
 import edu.columbia.cs.psl.phosphor.runtime.TaintInstrumented;
 import edu.columbia.cs.psl.phosphor.struct.SinglyLinkedList;
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag;
@@ -84,12 +83,7 @@ public class PreMain {
 
     @InvokedViaInstrumentation(record = TaintMethodRecord.INSTRUMENT_CLASS_BYTES)
     public static byte[] instrumentClassBytes(byte[] in){
-        return new PCLoggingTransformer().transform(null, null, null,null, in, false);
-    }
-
-    @InvokedViaInstrumentation(record = TaintMethodRecord.INSTRUMENT_CLASS_BYTES_ANONYMOUS)
-    public static byte[] instrumentClassBytesAnonymous(byte[] in){
-        return new PCLoggingTransformer().transform(null, null, null,null, in, true);
+        return new PCLoggingTransformer().transform(null, null, null,null, in);
     }
     public static final class PCLoggingTransformer extends PhosphorBaseTransformer {
 
@@ -99,7 +93,7 @@ public class PreMain {
 
         @Override
         public byte[] transform(ClassLoader loader, final String className2, Class<?> classBeingRedefined,
-                                ProtectionDomain protectionDomain, byte[] classfileBuffer, boolean isAnonymousClassDefinition) {
+                                ProtectionDomain protectionDomain, byte[] classfileBuffer) {
             ClassReader cr = (Configuration.READ_AND_SAVE_BCI ? new OffsetPreservingClassReader(classfileBuffer)
                     : new ClassReader(classfileBuffer));
             String className = cr.getClassName();
@@ -177,7 +171,7 @@ public class PreMain {
                 }
                 try {
                     byte[] instrumentedBytes = instrumentWithRetry(cr, classfileBuffer, isiFace, className, skipFrames,
-                            upgradeVersion, fields, null, false, isAnonymousClassDefinition);
+                            upgradeVersion, fields, null, false);
                     if (DEBUG) {
                         File f = new File("debug/" + className + ".class");
                         f.getParentFile().mkdirs();
@@ -200,7 +194,7 @@ public class PreMain {
 
         static byte[] instrumentWithRetry(ClassReader cr, byte[] classFileBuffer, boolean isiFace, String className,
                                           boolean skipFrames, boolean upgradeVersion, List<FieldNode> fields,
-                                          Set<String> methodsToReduceSizeOf, boolean traceClass, boolean isAnonymousClassDefinition) {
+                                          Set<String> methodsToReduceSizeOf, boolean traceClass) {
             TraceClassVisitor debugTracer = null;
             try {
                 try {
@@ -244,13 +238,11 @@ public class PreMain {
                         _cv = new SerializationFixingCV(_cv, className);
                     }
                     _cv = new ClinitRetransformClassVisitor(_cv);
-                    boolean isGenerateConstructorAccessor = StringUtils.startsWith(className, "sun/reflect/GeneratedConstructor")
-                            || StringUtils.startsWith(className, "jdk/internal/reflect/GeneratedConstructor"); // Calculating SVUID could trigger constructor generation causing stack overflow/infinite recursion
-                    if(isiFace || isGenerateConstructorAccessor) {
-                        _cv = new TaintTrackingClassVisitor(_cv, skipFrames, fields, methodsToReduceSizeOf, isAnonymousClassDefinition);
+                    if(isiFace) {
+                        _cv = new TaintTrackingClassVisitor(_cv, skipFrames, fields, methodsToReduceSizeOf);
                     } else {
                         _cv = new OurSerialVersionUIDAdder(new TaintTrackingClassVisitor(_cv, skipFrames, fields,
-                                methodsToReduceSizeOf, isAnonymousClassDefinition));
+                                methodsToReduceSizeOf));
                     }
                     if(EclipseCompilerCV.isEclipseCompilerClass(className)) {
                         _cv = new EclipseCompilerCV(_cv);
@@ -317,14 +309,14 @@ public class PreMain {
                     if(!methodsToReduceSizeOf.add(ex.getMethodName() + ex.getDescriptor())){
                         throw ex; //We already tried and failed to make this fit :(
                     }
-                    return instrumentWithRetry(cr, classFileBuffer, isiFace, className, skipFrames, upgradeVersion, fields,  methodsToReduceSizeOf, false, isAnonymousClassDefinition);
+                    return instrumentWithRetry(cr, classFileBuffer, isiFace, className, skipFrames, upgradeVersion, fields,  methodsToReduceSizeOf, false);
                 }
             } catch (Throwable ex) {
                 INSTRUMENTATION_EXCEPTION_OCCURRED = true;
                 if (!traceClass) {
                     System.err.println("Exception occurred while instrumenting " + className + ":");
                     ex.printStackTrace();
-                    instrumentWithRetry(cr, classFileBuffer, isiFace, className, skipFrames, upgradeVersion, fields,  methodsToReduceSizeOf, true, isAnonymousClassDefinition);
+                    instrumentWithRetry(cr, classFileBuffer, isiFace, className, skipFrames, upgradeVersion, fields,  methodsToReduceSizeOf, true);
                     return classFileBuffer;
                 }
                 ex.printStackTrace();

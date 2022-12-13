@@ -3,7 +3,6 @@ package edu.columbia.cs.psl.phosphor.instrumenter;
 import edu.columbia.cs.psl.phosphor.Configuration;
 import edu.columbia.cs.psl.phosphor.SourceSinkTransformer;
 import edu.columbia.cs.psl.phosphor.control.OpcodesUtil;
-import edu.columbia.cs.psl.phosphor.runtime.PhosphorStackFrame;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -29,9 +28,7 @@ public class ClinitRetransformMV extends MethodVisitor {
                 // Since the class is not at least the required version 1.5 for the ldc of a constant class, push the class
                 // onto the stack by making a call to Class.forName
                 super.visitLdcInsn(className.replace("/", "."));
-                super.visitInsn(Opcodes.ACONST_NULL);
-                TaintMethodRecord.STACK_FRAME_FOR_METHOD_DEBUG.delegateVisit(mv);
-                super.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Class", "forName", "(Ljava/lang/String;" + PhosphorStackFrame.DESCRIPTOR + ")Ljava/lang/Class;", false);
+                super.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Class", "forName", "(Ljava/lang/String;)Ljava/lang/Class;", false);
             } else {
                 // Directly push the class onto the stack
                 mv.visitLdcInsn(Type.getObjectType(className));

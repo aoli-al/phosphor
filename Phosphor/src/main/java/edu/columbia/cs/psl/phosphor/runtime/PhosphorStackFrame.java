@@ -9,17 +9,15 @@ import edu.columbia.cs.psl.phosphor.struct.*;
 public class PhosphorStackFrame {
     public static final String INTERNAL_NAME = "edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame";
     public static final String DESCRIPTOR = "L" + INTERNAL_NAME + ";";
-    public Taint[] argsPassed = new Taint[20];
-    public Object[] wrappedArgs = new Object[20];
+    public Taint[] argsPassed = new Taint[10];
+    public Object[] wrappedArgs = new Object[10];
     public Object wrappedReturn;
     public Taint returnTaint = Taint.emptyTaint();
     public ControlFlowStack controlFlowTags;
     public String intendedNextMethodDebug;
     public int intendedNextMethodFast;
     public PhosphorStackFrame prevFrame;
-    public boolean isFree;
-
-    private boolean needsCleanup; //TODO can we replace this with references to other fields?
+    public boolean needsCleanup;
 
     private PhosphorStackFrame spare;
 
@@ -28,9 +26,8 @@ public class PhosphorStackFrame {
     }
 
     public PhosphorStackFrame(PhosphorStackFrame prevFrame) {
-        this.isFree = false;
-        this.prevFrame = prevFrame;
         this.needsCleanup = true;
+        this.prevFrame = prevFrame;
     }
 
     public static int hashForDesc(String intendedNextMethodDebug) {
@@ -59,11 +56,9 @@ public class PhosphorStackFrame {
 
     @InvokedViaInstrumentation(record = TaintMethodRecord.POP_STACK_FRAME)
     public void popStackFrameIfNeeded(boolean shouldPop) {
-        if(shouldPop) {
-            this.isFree = true; //Allow this to be used as a "spare"
-            if (initialized) {
-                setForThread(this.prevFrame);
-            }
+        if (shouldPop) {
+            this.needsCleanup = true; //Allow this to be used as a "spare"
+            setForThread(this.prevFrame);
         }
     }
 
@@ -281,9 +276,9 @@ public class PhosphorStackFrame {
 
     @InvokedViaInstrumentation(record = TaintMethodRecord.GET_RETURN_TAINT)
     public Taint getReturnTaint() {
-        //if (initialized) {
-        //    setForThread(this.prevFrame);
-        //}
+        if (initialized) {
+            setForThread(this.prevFrame);
+        }
         Taint ret = this.returnTaint;
         this.returnTaint = Taint.emptyTaint();
         return ret;
@@ -307,13 +302,6 @@ public class PhosphorStackFrame {
         return initialized;
     }
 
-    @InvokedViaInstrumentation(record = TaintMethodRecord.CHECK_STACK_FRAME_TARGET)
-    public void checkTarget(String desc){
-        if(!StringUtils.equals(desc, intendedNextMethodDebug)) {
-            throw new IllegalStateException("Expected " + desc + " got " + intendedNextMethodDebug);
-        }
-    }
-
     @InvokedViaInstrumentation(record = TaintMethodRecord.STACK_FRAME_FOR_METHOD_DEBUG)
     public static PhosphorStackFrame forMethod(String desc) {
         if (!initialized) {
@@ -332,10 +320,8 @@ public class PhosphorStackFrame {
         PhosphorStackFrame ret = onThread;
         if (desc != null && ret.intendedNextMethodDebug != null && !StringUtils.equals(desc, ret.intendedNextMethodDebug)) {
             PhosphorStackFrame spare = onThread.spare;
-            if(spare != null && spare.isFree){
+            if(spare != null && spare.needsCleanup){
                 spare.prevFrame = onThread;
-                spare.isFree = false;
-                spare.needsCleanup = true;
                 ret = spare;
             } else {
                 ret = new PhosphorStackFrame(onThread);
@@ -344,7 +330,6 @@ public class PhosphorStackFrame {
                 }
             }
         }
-        ret.intendedNextMethodDebug = desc;
         return ret;
     }
 
@@ -365,10 +350,8 @@ public class PhosphorStackFrame {
         PhosphorStackFrame ret = onThread;
         if (ret.intendedNextMethodFast != hash) {
             PhosphorStackFrame spare = onThread.spare;
-            if (spare != null && spare.isFree) {
-                spare.isFree = false;
+            if (spare != null && spare.needsCleanup) {
                 spare.prevFrame = onThread;
-                spare.needsCleanup = true;
                 ret = spare;
             } else {
                 ret = new PhosphorStackFrame(onThread);

@@ -98,7 +98,7 @@ public class Instrumenter {
                 For these classes: HotSpot expects fields to be at hardcoded offsets of these classes. If we instrument
                 them, it will break those assumptions and segfault.
 
-                Different classes have different assumptions, and there are special cases for these elsewhere in Phosphor.
+                Different clasess have different assumptions, and there are special cases for these elsewhere in Phosphor.
                  */
                 || StringUtils.startsWith(owner, "java/lang/Object")
                 || StringUtils.startsWith(owner, "java/lang/Boolean")
@@ -107,10 +107,8 @@ public class Instrumenter {
                 || StringUtils.startsWith(owner, "java/lang/Short")
                 || StringUtils.startsWith(owner, "java/lang/Number")
                 || StringUtils.startsWith(owner, "java/lang/ref/Reference")
-                || StringUtils.startsWith(owner, "java/lang/ref/FinalReference")
                 || StringUtils.startsWith(owner, "java/lang/ref/SoftReference")
-                || StringUtils.equals(owner, "java/lang/invoke/LambdaForm") //Lambdas are hosted by this class, and when generated, will have hard-coded offsets to constant pool
-                || StringUtils.startsWith(owner, "java/lang/invoke/LambdaForm$") //Lambdas are hosted by this class, and when generated, will have hard-coded offsets to constant pool
+                || StringUtils.startsWith(owner, "java/lang/invoke/LambdaForm") //Lambdas are hosted by this class, and when generated, will have hard-coded offsets to constant pool
                 /*
                 Phosphor internal methods
                  */
@@ -123,7 +121,12 @@ public class Instrumenter {
                     Generated code won't be instrumented. Hence, it's convenient to also not wrap the native version,
                     so that passed params/returns line up exactly when we hit the reflected call
                  */
+                //|| StringUtils.startsWith(owner, "sun/reflect/NativeConstructorAccessorImpl")
+                //|| StringUtils.startsWith(owner, "sun/reflect/NativeMethodAccessorImpl")
+
                 || StringUtils.startsWith(owner, "edu/columbia/cs/psl/phosphor/struct/TaintedWith")
+                //|| StringUtils.startsWith(owner, "java/util/regex/HashDecompositions") //Huge constant array/hashmap
+                //|| StringUtils.startsWith(owner, "jdk/internal/module/SystemModules")
                 || StringUtils.startsWith(owner, "jdk/internal/misc/UnsafeConstants"); //Java 9+ class full of hardcoded offsets
     }
 
@@ -144,7 +147,7 @@ public class Instrumenter {
             is.close();
             buffer.flush();
             PreMain.PCLoggingTransformer transformer = new PreMain.PCLoggingTransformer();
-            byte[] ret = transformer.transform(Instrumenter.loader, path, null, null, buffer.toByteArray(), false);
+            byte[] ret = transformer.transform(Instrumenter.loader, path, null, null, buffer.toByteArray());
             if(addlTransformer != null) {
                 byte[] ret2 = addlTransformer.transform(Instrumenter.loader, path, null, null, ret);
                 if(ret2 != null) {
@@ -748,17 +751,17 @@ public class Instrumenter {
         if(name.equals("edu/columbia/cs/psl/phosphor/Configuration.class")){
             return embedPhopshorConfiguration(is);
         }
-        if (name.equals("edu/columbia/cs/psl/phosphor/runtime/RuntimeJDKInternalUnsafePropagator.class")) {
-            return transformRuntimeUnsafePropagator(is, "jdk/internal/misc/Unsafe");
+        if(name.equals("edu/columbia/cs/psl/phosphor/runtime/RuntimeJDKInternalUnsafePropagator.class")){
+            return transformRuntimeJDKUnsafePropagator(is);
         }
         throw new UnsupportedEncodingException("We do not plan to instrument " + name);
     }
 
-    public static byte[] transformRuntimeUnsafePropagator(InputStream is, String targetUnsafeInternalName) throws IOException {
+    public static byte[] transformRuntimeJDKUnsafePropagator(InputStream is) throws IOException {
         final String UNSAFE_PROXY_INTERNAL_NAME = Type.getInternalName(UnsafeProxy.class);
         final String UNSAFE_PROXY_DESC = Type.getDescriptor(UnsafeProxy.class);
-        final String TARGET_UNSAFE_INTERNAL_NAME = targetUnsafeInternalName;
-        final String TARGET_UNSAFE_DESC = "L" + targetUnsafeInternalName + ";";
+        final String TARGET_UNSAFE_INTERNAL_NAME = "jdk/internal/misc/Unsafe";
+        final String TARGET_UNSAFE_DESC = "Ljdk/internal/misc/Unsafe;";
         ClassReader cr = new ClassReader(is);
         ClassWriter cw = new ClassWriter(cr, 0);
         ClassVisitor cv = new ClassVisitor(Opcodes.ASM9, cw) {

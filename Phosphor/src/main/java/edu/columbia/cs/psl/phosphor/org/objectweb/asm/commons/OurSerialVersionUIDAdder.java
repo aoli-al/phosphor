@@ -29,7 +29,6 @@ package edu.columbia.cs.psl.phosphor.org.objectweb.asm.commons;
 
 import edu.columbia.cs.psl.phosphor.Configuration;
 import edu.columbia.cs.psl.phosphor.TaintUtils;
-import edu.columbia.cs.psl.phosphor.runtime.PhosphorStackFrame;
 import org.objectweb.asm.*;
 
 import java.io.ByteArrayOutputStream;
@@ -541,18 +540,6 @@ public class OurSerialVersionUIDAdder extends ClassVisitor {
                 retVal = desc.compareTo(other.desc);
             }
             return retVal;
-        }
-
-        public int compareTo(final Object _other, PhosphorStackFrame frame) {
-            if(_other instanceof Item) {
-                Item other = (Item) _other;
-                int retVal = name.compareTo(other.name);
-                if (retVal == 0) {
-                    retVal = desc.compareTo(other.desc);
-                }
-                return retVal;
-            }
-            return 0;
         }
 
         @Override

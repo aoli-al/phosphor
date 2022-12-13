@@ -403,4 +403,11 @@ public class OurLocalVariablesSorter extends MethodVisitor {
         }
     }
 
+    public void setNumLocalVariablesAddedAfterArgs(int numLocalVariablesAddedAfterArgs) {
+        if(this.firstLocal != this.nextLocal){
+            throw new IllegalStateException("Must set this before creating new LVs");
+        }
+        this.firstLocal += numLocalVariablesAddedAfterArgs;
+        this.nextLocal = this.firstLocal;
+    }
 }

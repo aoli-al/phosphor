@@ -2,7 +2,6 @@ package edu.columbia.cs.psl.phosphor.instrumenter;
 
 import edu.columbia.cs.psl.phosphor.BasicSourceSinkManager;
 import edu.columbia.cs.psl.phosphor.Configuration;
-import edu.columbia.cs.psl.phosphor.TaintUtils;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -30,7 +29,7 @@ public class SourceSinkTaintingClassVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-        if((access & Opcodes.ACC_NATIVE) == 0 && TaintUtils.containsPhosphorStackFrame(desc)) {
+        if((access & Opcodes.ACC_NATIVE) == 0) {
             if(BasicSourceSinkManager.getInstance().isSink(className, name, desc)) {
                 // Method is a sink
                 final SinkTaintingMV sinkMV = new SinkTaintingMV(mv, access, className, name, desc);

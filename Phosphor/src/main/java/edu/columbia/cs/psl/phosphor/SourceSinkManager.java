@@ -10,7 +10,7 @@ public abstract class SourceSinkManager {
     public abstract boolean isTaintThrough(String str);
 
     public Object getLabel(String owner, String name, String taintedDesc) {
-        return getLabel(owner + "." + name + TaintUtils.getOriginalDescrptor(taintedDesc));
+        return getLabel(owner + "." + name + taintedDesc);
     }
 
     public abstract Object getLabel(String str);
@@ -26,15 +26,15 @@ public abstract class SourceSinkManager {
     }
 
     public boolean isTaintThrough(String owner, String name, String taintedDesc) {
-        return isTaintThrough(owner + "." + name + TaintUtils.getOriginalDescrptor(taintedDesc));
+        return isTaintThrough(owner + "." + name + taintedDesc);
     }
 
     public boolean isSink(String owner, String name, String taintedDesc) {
-        return isSink(owner + "." + name + TaintUtils.getOriginalDescrptor(taintedDesc));
+        return isSink(owner + "." + name + taintedDesc);
     }
 
     public boolean isSource(String owner, String name, String taintedDesc) {
-        return isSource(owner + "." + name + TaintUtils.getOriginalDescrptor(taintedDesc));
+        return isSource(owner + "." + name + taintedDesc);
     }
 
     /*
@@ -43,7 +43,7 @@ public abstract class SourceSinkManager {
      * method is not a sink.
      */
     public String getBaseSink(String owner, String name, String taintedDesc) {
-        return getBaseSink(owner + "." + name + TaintUtils.getOriginalDescrptor(taintedDesc));
+        return getBaseSink(owner + "." + name + taintedDesc);
     }
 
     public abstract String getBaseSink(String str);
