@@ -16,6 +16,7 @@ import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.POP;
+import static org.objectweb.asm.Opcodes.POP2;
 
 public class ConfigurationEmbeddingMV extends MethodVisitor  {
     public ConfigurationEmbeddingMV(MethodVisitor mv) {
@@ -50,7 +51,9 @@ public class ConfigurationEmbeddingMV extends MethodVisitor  {
             switch (type.getSort()) {
                 case Type.LONG:
                 case Type.DOUBLE:
-                    super.visitInsn(POP);
+                    super.visitInsn(POP2);
+                    super.visitLdcInsn(fieldValue);
+                    break;
                 case Type.BOOLEAN:
                 case Type.INT:
                 case Type.FLOAT:
