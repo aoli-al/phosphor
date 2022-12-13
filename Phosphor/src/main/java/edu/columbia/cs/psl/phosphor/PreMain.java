@@ -25,7 +25,7 @@ import java.security.ProtectionDomain;
 
 public class PreMain {
 
-    public static boolean DEBUG = false;
+    public static boolean DEBUG = Boolean.getBoolean("Phosphor.DEBUG");
     public static boolean RUNTIME_INST = false;
     public static boolean INSTRUMENTATION_EXCEPTION_OCCURRED = false;
     public static ClassLoader bigLoader = PreMain.class.getClassLoader();
