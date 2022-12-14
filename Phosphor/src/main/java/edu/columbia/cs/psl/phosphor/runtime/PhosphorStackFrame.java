@@ -271,6 +271,7 @@ public class PhosphorStackFrame {
 
     @InvokedViaInstrumentation(record = TaintMethodRecord.GET_ARG_TAINT)
     public Taint getArgTaint(int idx) {
+        ensureArgsLength(idx);
         return argsPassed[idx];
     }
 
