@@ -25,6 +25,7 @@ import java.security.ProtectionDomain;
 public class PreMain {
 
     public static boolean DEBUG = Boolean.getBoolean("Phosphor.DEBUG");
+    public static String INSTRUMENTATION_CLASSPATH = System.getProperty("Phosphor.INSTRUMENTATION_CLASSPATH");
     public static boolean RUNTIME_INST = false;
     public static boolean INSTRUMENTATION_EXCEPTION_OCCURRED = false;
     public static ClassLoader bigLoader = PreMain.class.getClassLoader();
@@ -172,8 +173,8 @@ public class PreMain {
                 try {
                     byte[] instrumentedBytes = instrumentWithRetry(cr, classfileBuffer, isiFace, className, skipFrames,
                             upgradeVersion, fields, null, false);
-                    if (DEBUG) {
-                        File f = new File("debug/" + className + ".class");
+                    if (INSTRUMENTATION_CLASSPATH != null) {
+                        File f = new File(INSTRUMENTATION_CLASSPATH + "/" + className + ".class");
                         f.getParentFile().mkdirs();
                         FileOutputStream fos = new FileOutputStream(f);
                         fos.write(instrumentedBytes);
