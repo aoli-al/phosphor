@@ -26,6 +26,7 @@ public class PreMain {
 
     public static boolean DEBUG = Boolean.getBoolean("Phosphor.DEBUG");
     public static String INSTRUMENTATION_CLASSPATH = System.getProperty("Phosphor.INSTRUMENTATION_CLASSPATH");
+    public static String ORIGIN_CLASSPATH = System.getProperty("Phosphor.ORIGIN_CLASSPATH");
     public static boolean RUNTIME_INST = false;
     public static boolean INSTRUMENTATION_EXCEPTION_OCCURRED = false;
     public static ClassLoader bigLoader = PreMain.class.getClassLoader();
@@ -158,6 +159,17 @@ public class PreMain {
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     }
+                }
+                if (ORIGIN_CLASSPATH != null) {
+                    File f = new File(ORIGIN_CLASSPATH + "/" + className + ".class");
+                    f.getParentFile().mkdirs();
+                    try {
+                        FileOutputStream fos = new FileOutputStream(f);
+                        fos.write(classfileBuffer);
+                        fos.close();
+                    } catch (IOException e) {
+                    }
+
                 }
                 boolean isiFace = (cn.access & Opcodes.ACC_INTERFACE) != 0;
                 List<FieldNode> fields = new LinkedList<>();
