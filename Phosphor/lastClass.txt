@@ -1,0 +1,14 @@
+// class version 52.0 (52)
+// access flags 0x21
+public class Test implements edu/columbia/cs/psl/phosphor/struct/TaintedWithObjTag {
+
+
+  @Ledu/columbia/cs/psl/phosphor/runtime/TaintInstrumented;() // invisible
+
+  // access flags 0x9
+  public static example()V
+
+  // access flags 0x9
+  public static example()V
+   L0
+   L1

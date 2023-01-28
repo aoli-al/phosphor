@@ -39,9 +39,9 @@ public class LegacyClassFixer {
     public static boolean shouldFixFrames(ClassNode cn, String className, ClassReader cr) {
         if (cn.version >= 100 || cn.version <= 50 || className.endsWith("$Access4JacksonSerializer")
                 || className.endsWith("$Access4JacksonDeSerializer")) {
-            if (className.startsWith("org/apache/derby/exe/")) {
-                return false;
-            }
+            //            if (className.startsWith("org/apache/derby/exe/")) {
+            //                return false;
+            //            }
             return true;
         } else if (Configuration.ALWAYS_CHECK_FOR_FRAMES) {
             cn = new ClassNode();

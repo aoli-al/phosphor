@@ -25,7 +25,8 @@ import java.security.ProtectionDomain;
 public class PreMain {
 
     public static boolean DEBUG = Boolean.getBoolean("Phosphor.DEBUG");
-    public static String INSTRUMENTATION_CLASSPATH = System.getProperty("Phosphor.INSTRUMENTATION_CLASSPATH");
+    public static String INSTRUMENTATION_CLASSPATH = System.getProperty("Phosphor.INSTRUMENTATION_CLASSPATH", "/tmp" +
+            "/instrumented_classes");
     public static String ORIGIN_CLASSPATH = System.getProperty("Phosphor.ORIGIN_CLASSPATH");
     public static boolean RUNTIME_INST = false;
     public static boolean INSTRUMENTATION_EXCEPTION_OCCURRED = false;
