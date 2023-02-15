@@ -29,7 +29,13 @@ public class RuntimeSunMiscUnsafePropagator {
     private static SinglyLinkedList<OffsetPair> getOffsetPairs(Unsafe unsafe, Class<?> targetClazz) {
         SinglyLinkedList<OffsetPair> list = new SinglyLinkedList<>();
         for(Class<?> clazz = targetClazz; clazz != null && !Object.class.equals(clazz); clazz = clazz.getSuperclass()) {
-            for(Field field : clazz.getDeclaredFields()) {
+            Field[] fields;
+            try {
+                fields = clazz.getDeclaredFields();
+            } catch (Throwable e) {
+                continue;
+            }
+            for(Field field : fields) {
                 try {
                     Class<?> fieldClazz = field.getType();
                     boolean isStatic = Modifier.isStatic(field.getModifiers());
