@@ -88,8 +88,11 @@ public class TaintPassingMV extends TaintAdapter implements Opcodes {
                 ensureObjsAreWrapped = true; //TODO should we always do this? just in some places? performance is what? If try everywhere, it crashes...
             }
         }
+        if (this.className.startsWith("sun/security/x509") && this.methodName.startsWith("<init>")) {
+            ensureObjsAreWrapped = true;
+        }
         boolean pullWrapperFromPrev = false;
-        if(this.className.startsWith("java/lang/invoke/VarHandleGuards") && this.methodName.startsWith("guard_")){
+        if (this.className.startsWith("java/lang/invoke/VarHandleGuards") && this.methodName.startsWith("guard_")) {
             pullWrapperFromPrev = true;
         }
 

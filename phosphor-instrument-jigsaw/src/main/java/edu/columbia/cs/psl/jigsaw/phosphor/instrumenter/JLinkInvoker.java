@@ -5,12 +5,32 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class JLinkInvoker {
 
     public static final String MODULES_PROPERTY = "jvmModules";
+
+    public static final List<String> INTRINSICS = List.of(
+            "UseLibmIntrinsic",
+            "UseMD5Intrinsics",
+            "UseMathExactIntrinsics",
+            "UseMontgomeryMultiplyIntrinsic",
+            "UseMontgomerySquareIntrinsic",
+            "UseMulAddIntrinsic",
+            "UseMultiplyToLenIntrinsic",
+            "UseSHA1Intrinsics",
+            "UseSHA256Intrinsics",
+            "UseSHA3Intrinsics",
+            "UseSHA512Intrinsics",
+            "UseSSE42Intrinsics",
+            "UseSignumIntrinsic",
+            "UseSquareToLenIntrinsic",
+            "UseVectorizedMismatchIntrinsic"
+    );
 
     public static void invokeJLink(File jvmDir, File instJVMDir, Properties properties) {
 
@@ -36,7 +56,9 @@ public class JLinkInvoker {
                 "-J--class-path=" + String.join(":", classPaths),
                 "--output=" + instJVMDir,
                 "--phosphor-transformer=transform" + createPhosphorJLinkPluginArgument(properties),
-                "--add-modules=" + modulesToAdd
+                "--add-modules=" + modulesToAdd,
+                "--add-options=-XX:+UnlockDiagnosticVMOptions " +
+                        INTRINSICS.stream().map(it -> "-XX:-" + it).collect(Collectors.joining(" "))
         );
         try {
             for(String s : pb.command()){
