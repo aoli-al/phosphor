@@ -160,6 +160,7 @@ public class BasicSourceSinkManager extends SourceSinkManager {
         }
     }
 
+    static int recordClass = 0;
     /* Stores the specified class instance so that it can last be used to retransform the class if it's autoTaint methods
      * change as a result of a call to replaceAutoTaintMethods. */
     public static synchronized void recordClass(Class<?> clazz) {
@@ -167,6 +168,7 @@ public class BasicSourceSinkManager extends SourceSinkManager {
             String key = clazz.getName().replace(".", "/");
             classMap.putIfAbsent(key, new HashSet<>());
             classMap.get(key).add(clazz);
+            recordClass += 1;
         }
     }
 

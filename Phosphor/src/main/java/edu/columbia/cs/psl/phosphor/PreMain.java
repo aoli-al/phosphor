@@ -251,7 +251,9 @@ public class PreMain {
                     if(SerializationFixingCV.isApplicable(className)) {
                         _cv = new SerializationFixingCV(_cv, className);
                     }
-                    _cv = new ClinitRetransformClassVisitor(_cv);
+                    if (!Configuration.taintTagFactory.disableClinitRetransform()) {
+                        _cv = new ClinitRetransformClassVisitor(_cv);
+                    }
                     if(isiFace) {
                         _cv = new TaintTrackingClassVisitor(_cv, skipFrames, fields, methodsToReduceSizeOf);
                     } else {

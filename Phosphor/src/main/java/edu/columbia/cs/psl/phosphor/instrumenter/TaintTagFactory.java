@@ -31,6 +31,10 @@ public interface TaintTagFactory {
 
     boolean isIgnoredClass(String className);
 
+    default boolean disableClinitRetransform() {
+        return false;
+    }
+
     default boolean makeFieldTransient() {
         return true;
     }
