@@ -427,7 +427,7 @@ public class TaintTrackingClassVisitor extends ClassVisitor {
         if (TaintUtils.isWrappedTypeWithSeparateField(fieldType)) {
             extraFieldsToVisit.add(new FieldNode(access, name + TaintUtils.TAINT_WRAPPER_FIELD,
                     TaintUtils.getWrapperType(fieldType).getDescriptor(), null, null));
-            if ((access & Opcodes.ACC_STATIC) == 0) {
+            if (((access & Opcodes.ACC_STATIC) == 0) && Configuration.taintTagFactory.makeFieldTransient()) {
                 access = access | Opcodes.ACC_TRANSIENT;
             }
         }
