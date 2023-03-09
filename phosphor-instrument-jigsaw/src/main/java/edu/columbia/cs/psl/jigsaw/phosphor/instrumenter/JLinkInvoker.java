@@ -4,6 +4,7 @@ import edu.columbia.cs.psl.phosphor.Configuration;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -50,16 +51,23 @@ public class JLinkInvoker {
             classPaths.add(Configuration.taintTagFactory.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
         }
 
-        ProcessBuilder pb = new ProcessBuilder(jlinkBin, "-J-javaagent:" + jlinkFile,
+        List<String> commands = new ArrayList<>(List.of(
+                jlinkBin,
+                "-J-javaagent:" + jlinkFile,
                 "-J--module-path=" + jlinkFile,
                 "-J--add-modules=edu.columbia.cs.psl.jigsaw.phosphor.instrumenter",
                 "-J--class-path=" + String.join(":", classPaths),
                 "--output=" + instJVMDir,
                 "--phosphor-transformer=transform" + createPhosphorJLinkPluginArgument(properties),
-                "--add-modules=" + modulesToAdd,
-                "--add-options=-XX:+UnlockDiagnosticVMOptions " +
-                        INTRINSICS.stream().map(it -> "-XX:-" + it).collect(Collectors.joining(" "))
-        );
+                "--add-modules=" + modulesToAdd
+        ));
+
+        if (!Configuration.taintTagFactory.getClass().getName().contains("FieldOnly")) {
+            commands.add("--add-options=-XX:+UnlockDiagnosticVMOptions " +
+                    INTRINSICS.stream().map(it -> "-XX:-" + it).collect(Collectors.joining(" ")));
+        }
+
+        ProcessBuilder pb = new ProcessBuilder(commands.toArray(new String[]{}));
         try {
             for(String s : pb.command()){
                 System.out.print(s + " ");
